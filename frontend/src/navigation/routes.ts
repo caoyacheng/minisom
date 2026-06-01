@@ -1,6 +1,7 @@
 /** 页面路由与 Topbar 标题 */
 export const ROUTE_TITLES: Record<string, string> = {
   '/': '总览',
+  '/pipeline': '建模流水线',
   '/models': '模型中心',
   '/datasets': '数据集',
   '/train': '训练',

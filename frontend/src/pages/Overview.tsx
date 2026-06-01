@@ -1,18 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, type ModelRecord } from '../api/client';
 import { Panel, StatusBadge } from '../components/ui';
 import { useAppContext } from '../context/AppContext';
-import { WORKFLOW_STEPS } from '../navigation/routes';
 import { listModelTypes } from '../model-types/registry';
 
 export default function Overview() {
-  const {
-    trainDataset,
-    trainJob,
-    trainTraining,
-    testResult,
-  } = useAppContext();
+  const { trainDataset, trainJob, trainTraining, testResult } = useAppContext();
 
   const [models, setModels] = useState<ModelRecord[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -36,27 +30,6 @@ export default function Overview() {
   const availableCount = listModelTypes({ status: 'available' }).length;
   const upcomingCount = listModelTypes({ status: 'coming_soon' }).length;
 
-  const pipelineState = useMemo(() => {
-    const step = (id: string): 'done' | 'active' | 'idle' => {
-      switch (id) {
-        case 'datasets':
-          return trainDataset ? 'done' : 'idle';
-        case 'train':
-          if (trainTraining) return 'active';
-          if (trainJob?.status === 'completed') return 'done';
-          if (trainJob?.status === 'running' || trainJob?.status === 'pending') return 'active';
-          return 'idle';
-        case 'evaluate':
-          return testResult ? 'done' : 'idle';
-        case 'deploy':
-          return activeModel ? 'done' : 'idle';
-        default:
-          return 'idle';
-      }
-    };
-    return WORKFLOW_STEPS.map((s) => ({ ...s, state: step(s.id) }));
-  }, [trainDataset, trainTraining, trainJob, testResult, activeModel]);
-
   const headline = activeModel
     ? `推理在线 · ${activeModel.name}`
     : trainTraining
@@ -77,6 +50,10 @@ export default function Overview() {
       </section>
 
       <div className="overview-stats">
+        <Link to="/pipeline" className="overview-stat overview-stat--accent">
+          <span className="overview-stat-value">→</span>
+          <span className="overview-stat-label">建模流水线</span>
+        </Link>
         <Link to="/models" className="overview-stat">
           <span className="overview-stat-value">{models.length}</span>
           <span className="overview-stat-label">已保存模型</span>
@@ -96,21 +73,6 @@ export default function Overview() {
           <span className="overview-stat-label">本轮训练</span>
         </div>
       </div>
-
-      <Panel title="建模进度">
-        <div className="overview-pipeline">
-          {pipelineState.map((step, i) => (
-            <Link
-              key={step.id}
-              to={step.path}
-              className={`overview-pipeline-step ${step.state}`}
-            >
-              <span className="overview-pipeline-num">{i + 1}</span>
-              <span className="overview-pipeline-label">{step.label}</span>
-            </Link>
-          ))}
-        </div>
-      </Panel>
 
       <div className="overview-bottom">
         <Panel title="平台快照" className="overview-bottom-main">
@@ -169,7 +131,10 @@ export default function Overview() {
 
         <Panel title="快捷入口" className="overview-bottom-side">
           <div className="overview-actions">
-            <Link to="/train" className="btn btn-primary full">
+            <Link to="/pipeline" className="btn btn-primary full">
+              打开建模流水线
+            </Link>
+            <Link to="/train" className="btn btn-secondary full">
               新建训练
             </Link>
             <Link to="/models" className="btn btn-secondary full">

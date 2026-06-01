@@ -13,6 +13,7 @@ import ModelDetail from './pages/ModelDetail';
 import Models from './pages/Models';
 import Monitor from './pages/Monitor';
 import Overview from './pages/Overview';
+import Pipeline from './pages/Pipeline';
 import Train from './pages/Train';
 
 export default function App() {
@@ -27,7 +28,8 @@ export default function App() {
   }, []);
 
   const title = pageTitle(location.pathname);
-  const showHubSearch = !location.pathname.startsWith('/models/');
+  const isPipeline = location.pathname === '/pipeline';
+  const showHubSearch = !location.pathname.startsWith('/models/') && !isPipeline;
 
   const badges = useMemo(() => {
     const items: { label: string; tone: 'muted' | 'ok' | 'warn' | 'err' }[] = [];
@@ -55,24 +57,27 @@ export default function App() {
     <div className="app-shell">
       <Sidebar />
       <div className="main">
-        <header className="topbar">
-          <h1>{title}</h1>
-          <div className="topbar-right">
-            {showHubSearch && (
-              <div className="topbar-search">
-                <HubSearch compact />
+        {!isPipeline && (
+          <header className="topbar">
+            <h1>{title}</h1>
+            <div className="topbar-right">
+              {showHubSearch && (
+                <div className="topbar-search">
+                  <HubSearch compact />
+                </div>
+              )}
+              <div className="badge-row">
+                {badges.map((b) => (
+                  <StatusBadge key={b.label} label={b.label} tone={b.tone} />
+                ))}
               </div>
-            )}
-            <div className="badge-row">
-              {badges.map((b) => (
-                <StatusBadge key={b.label} label={b.label} tone={b.tone} />
-              ))}
             </div>
-          </div>
-        </header>
-        <div className="content-scroll">
+          </header>
+        )}
+        <div className={`content-scroll${isPipeline ? ' content-scroll--canvas' : ''}`}>
           <Routes>
             <Route path="/" element={<Overview />} />
+            <Route path="/pipeline" element={<Pipeline />} />
             <Route path="/models" element={<Models />} />
             <Route path="/models/:id" element={<ModelDetail />} />
             <Route path="/datasets" element={<Datasets />} />

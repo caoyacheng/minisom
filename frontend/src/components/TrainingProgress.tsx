@@ -4,15 +4,16 @@ import { Panel } from './ui';
 
 interface Props {
   job: TrainingJobStatus | null;
+  compact?: boolean;
 }
 
-export default function TrainingProgress({ job }: Props) {
+export default function TrainingProgress({ job, compact = false }: Props) {
   if (!job) return null;
 
   const statusText = jobStatusLabel[job.status] ?? job.status;
 
-  return (
-    <Panel title="训练进度">
+  const body = (
+    <>
       <div className="progress-header">
         <span>{statusText}</span>
         <span>{job.progress.toFixed(1)}%</span>
@@ -31,11 +32,18 @@ export default function TrainingProgress({ job }: Props) {
         </p>
       )}
       {job.error && <p className="text-error" style={{ marginTop: 8 }}>{job.error}</p>}
-      {job.model_id && (
+      {job.model_id && !compact && (
         <p className="text-success" style={{ marginTop: 8 }}>
           模型已保存：{job.model_id}
         </p>
       )}
-    </Panel>
+      {job.model_id && compact && (
+        <p className="pipeline-node-meta">模型 ID：{job.model_id.slice(0, 8)}…</p>
+      )}
+    </>
   );
+
+  if (compact) return <div className="training-progress-compact">{body}</div>;
+
+  return <Panel title="训练进度">{body}</Panel>;
 }

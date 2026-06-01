@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Layers,
   Rocket,
+  Waypoints,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export const SIDEBAR_GROUPS: SidebarGroup[] = [
     label: '工作台',
     items: [
       { to: '/', label: '总览', icon: LayoutDashboard, end: true },
+      { to: '/pipeline', label: '建模流水线', icon: Waypoints },
       { to: '/models', label: '模型中心', icon: Layers },
     ],
   },
