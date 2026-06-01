@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
+from app.config import get_settings
 from app.models import get_adapter
 from app.schemas import PredictRequest, PredictResult
 from app.services import model_registry
@@ -72,6 +73,10 @@ async def predict_file(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     content = await file.read()
+    max_bytes = get_settings().max_upload_bytes
+    if len(content) > max_bytes:
+        mb = max_bytes // (1024 * 1024)
+        raise HTTPException(status_code=413, detail=f"File too large. Limit: {mb} MB")
     df = pd.read_csv(io.BytesIO(content))
     try:
         actual_columns = resolve_columns(

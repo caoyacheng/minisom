@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -11,15 +12,27 @@ from app.schemas import HealthResponse
 from app.services import model_registry
 from app.storage.bootstrap import bootstrap_storage
 
+FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """应用生命周期：启动时初始化存储 + 导入历史数据。"""
+    bootstrap_storage()
+    yield
+
+
 app = FastAPI(
     title="工业模型工作台 API",
     description="Train, test, and deploy Self-Organizing Maps",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
+_settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5180", "http://127.0.0.1:5180"],
+    allow_origins=_settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,22 +44,14 @@ app.include_router(evaluation.router)
 app.include_router(models.router)
 app.include_router(inference.router)
 
-FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
-
-
-@app.on_event("startup")
-def startup() -> None:
-    bootstrap_storage()
-
 
 @app.get("/api/health", response_model=HealthResponse)
 def health() -> HealthResponse:
-    settings = get_settings()
-    db_scheme = settings.database_url.split(":", 1)[0]
+    db_scheme = _settings.database_url.split(":", 1)[0]
     return HealthResponse(
         status="ok",
         active_model_id=model_registry.get_active_model_id(),
-        storage_backend=settings.storage_backend,
+        storage_backend=_settings.storage_backend,
         database_url_scheme=db_scheme,
     )
 

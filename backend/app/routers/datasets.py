@@ -1,5 +1,6 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
+from app.config import get_settings
 from app.schemas import DatasetDetail, DatasetListResponse, DatasetPreview, DatasetSummary
 from app.services import data_service
 
@@ -18,9 +19,17 @@ def list_datasets() -> DatasetListResponse:
 async def upload_dataset(file: UploadFile = File(...)) -> DatasetPreview:
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are supported")
+
+    settings = get_settings()
     content = await file.read()
     if not content:
         raise HTTPException(status_code=400, detail="Empty file")
+    if len(content) > settings.max_upload_bytes:
+        mb = settings.max_upload_bytes // (1024 * 1024)
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large. Limit: {mb} MB",
+        )
     try:
         result = data_service.save_dataset(content, file.filename)
     except Exception as exc:

@@ -217,20 +217,29 @@ class MetadataStore:
                 raise FileNotFoundError(f"Model {model_id} has no versions")
             return _version_to_record(found, version)
 
-    def delete_model(self, model_id: str) -> list[str]:
-        """删除模型元数据，返回需删除的 blob keys。"""
+    def get_model_blob_keys(self, model_id: str) -> list[str]:
+        """返回该模型所有版本相关的 blob keys（去重、保序），不修改元数据。"""
         with session_scope() as session:
             model = session.get(ModelRow, model_id)
             if model is None:
-                return []
-            keys = [v.weights_key for v in model.versions]
+                raise FileNotFoundError(f"Model {model_id} not found")
+            seen: set[str] = set()
+            keys: list[str] = []
             for v in model.versions:
-                if v.manifest_key:
-                    keys.append(v.manifest_key)
-                keys.append(v.weights_key.replace("weights.pkl", "training_config.json"))
+                for key in (v.weights_key, v.manifest_key):
+                    if key and key not in seen:
+                        seen.add(key)
+                        keys.append(key)
+            return keys
+
+    def delete_model(self, model_id: str) -> None:
+        """硬删除模型元数据。调用方应先删除对应的 blob 以避免孤儿文件。"""
+        with session_scope() as session:
+            model = session.get(ModelRow, model_id)
+            if model is None:
+                return
             session.delete(model)
             session.commit()
-            return keys
 
     def get_active_model_id(self) -> Optional[str]:
         with session_scope() as session:
