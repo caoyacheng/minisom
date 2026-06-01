@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="UTF-8"><title>SOM U-Matrix — chemical-som-v1</title>
+<style>
+body{font-family:-apple-system,sans-serif;background:#1a1a2e;color:#eee;margin:20px}
+h2{text-align:center}.container{display:flex;gap:30px;flex-wrap:wrap;justify-content:center}
+.panel{background:#16213e;border-radius:12px;padding:20px}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;width:500px;height:500px}
+.cell{border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:#fff;text-shadow:0 1px 2px #000}
+.legend{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px}
+.legend-bar{width:200px;height:16px;border-radius:4px;background:linear-gradient(to right,#1a5276,#2980b9,#27ae60,#f39c12,#e74c3c)}
+.meta{color:#888;font-size:13px;margin-top:8px;text-align:center}
+</style></head><body>
+<h2>SOM U-Matrix 距离图 + 激活响应</h2>
+<p class="meta">模型: chemical-som-v1 | 网格: 10x10 | 特征: 12维 | 量化误差: 2.18 | 拓扑误差: 22.3%</p>
+<div class="container">
+<div class="panel"><h3 style="margin-top:0;text-align:center">U-Matrix（神经元间距离）</h3><div class="grid" id="u"></div>
+<div class="legend"><span>低（相似）</span><div class="legend-bar"></div><span>高（边界）</span></div>
+<div class="meta">暖色=簇边界 | 冷色=簇内部</div></div>
+<div class="panel"><h3 style="margin-top:0;text-align:center">激活响应（样本数）</h3><div class="grid" id="a"></div>
+<div class="meta">亮色=样本密集 | 数值=落在该神经元的样本数</div></div></div>
+<script>
+const m=[[1.99e-16,1.97e-10,.0653,.5622,.5752,.1746,.1485,.1483,.1483,.0868],[1.95e-10,.0026,.2606,1.0,.7558,.2792,.246,.2456,.2456,.1483],[.0638,.2573,.7625,.9573,.5507,.2615,.2458,.2456,.2456,.1483],[.5447,.977,.9462,.6553,.3399,.249,.2457,.2456,.2456,.1483],[.5559,.7363,.5437,.3389,.2544,.2459,.2456,.2456,.2456,.1483],[.1711,.2773,.2611,.2489,.2459,.2456,.2456,.2456,.2456,.1483],[.1485,.246,.2458,.2457,.2456,.2456,.2456,.2456,.2456,.1483],[.1483,.2456,.2456,.2456,.2456,.2456,.2456,.2456,.2456,.1483],[.1483,.2456,.2456,.2456,.2456,.2456,.2456,.2456,.2456,.1483],[.0868,.1483,.1483,.1483,.1483,.1483,.1483,.1483,.1483,.0868]];
+const a=[[4,0,0,16,1,0,1,6,11,82],[0,0,1,82,0,0,0,0,0,0],[0,0,1,6,0,0,0,0,0,0],[4,4,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1],[43,14,11,8,1,1,1,4,3,83]];
+function h(v){if(v<.25){let t=v/.25;return`rgb(${26+95*t|0},${82+128*t|0},${118+46*t|0})`}else if(v<.5){let t=(v-.25)/.25;return`rgb(${121+80*t|0},${210-5*t|0},${164-64*t|0})`}else if(v<.75){let t=(v-.5)/.25;return`rgb(${201+40*t|0},${205-62*t|0},${100-54*t|0})`}else{let t=(v-.75)/.25;return`rgb(${241+14*t|0},${143-100*t|0},${46-15*t|0})`}}
+function r(i,d,f,c){let e=document.getElementById(i);for(let y=0;y<10;y++)for(let x=0;x<10;x++){let v=d[y][x],l=document.createElement('div');l.className='cell';l.style.background=c(v);l.textContent=f(v);l.title=`[${y},${x}]=`+(typeof v=='number'?v.toFixed(4):v);e.appendChild(l)}}
+r('u',m,v=>v<.01?'':v.toFixed(2),v=>h(v));
+r('a',a,v=>v>0?v:'',v=>v===0?'#1a1a3e':h(Math.pow(v/83,.5)));
+</script></body></html>

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "som-workbench": {
+      "command": "/path/to/your-repo/mcp/.venv/bin/python",
+      "args": ["-m", "som_mcp"],
+      "cwd": "/path/to/your-repo/mcp",
+      "env": {
+        "SOM_API_BASE": "http://127.0.0.1:8000",
+        "NO_PROXY": "127.0.0.1,localhost",
+        "no_proxy": "127.0.0.1,localhost"
+      }
+    }
+  }
+}

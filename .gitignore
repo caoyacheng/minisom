@@ -1,45 +1,31 @@
+# Python
 *.py[cod]
-
-# C extensions
 *.so
-
-# Packages
 *.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
+*.egg-info/
+dist/
+build/
 .coverage
-.tox
+.tox/
 nosetests.xml
-
-# Translations
 *.mo
 
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Mac files
+# OS / IDE
 .DS_Store
-
-# IDE config
 .idea/
+.vscode/*
+!.vscode/extensions.json
 
-# Notebooks checkpoints
-examples/.ipynb_checkpoints/
+# Backend runtime
+backend/storage/
+backend/.venv/
 
+# MCP
+mcp/.venv/
+
+# Frontend (Vite also has frontend/.gitignore)
+frontend/node_modules/
+frontend/dist/
+
+# SOM example notebooks
+backend/app/models/som/examples/.ipynb_checkpoints/
